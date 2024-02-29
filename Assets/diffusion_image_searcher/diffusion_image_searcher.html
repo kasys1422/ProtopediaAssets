@@ -132,6 +132,8 @@
     </div>
 
     <script>
+        let isUIDisplayed = true; // UIの表示状態を追跡
+
         let currentSlide = 0;
         const slides = document.querySelectorAll(".slide");
         const totalSlides = slides.length;
@@ -179,31 +181,47 @@
         // 初期状態として最初のスライドをアクティブにし、UIを表示
         updateSlide(0);
 
+        function toggleUI(event) {
+            // UI要素との衝突判定を行う場合には、ここでチェック
+            // 今回は画像部分のみでのイベントを想定しているため、直接切り替えを行う
+            isUIDisplayed = !isUIDisplayed; // UIの表示状態を切り替え
+            if (isUIDisplayed) {
+                showUI();
+            } else {
+                hideUI();
+            }
+        }
+
+        // スライド部分に対してのみイベントリスナーを追加
+        slides.forEach(slide => {
+            slide.addEventListener('touchend', toggleUI, false);
+        });
+
         let touchStartX = 0;
-let touchEndX = 0;
+        let touchEndX = 0;
 
-function handleTouchStart(event) {
-    touchStartX = event.touches[0].clientX;
-}
+        function handleTouchStart(event) {
+            touchStartX = event.touches[0].clientX;
+        }
 
-function handleTouchMove(event) {
-    touchEndX = event.touches[0].clientX;
-}
+        function handleTouchMove(event) {
+            touchEndX = event.touches[0].clientX;
+        }
 
-function handleTouchEnd() {
-    if (touchStartX - touchEndX > 50) {
-        // 右から左へのスワイプ
-        updateSlide(currentSlide + 1);
-    } else if (touchStartX - touchEndX < -50) {
-        // 左から右へのスワイプ
-        updateSlide(currentSlide - 1);
-    }
-}
+        function handleTouchEnd() {
+            if (touchStartX - touchEndX > 50) {
+                // 右から左へのスワイプ
+                updateSlide(currentSlide + 1);
+            } else if (touchStartX - touchEndX < -50) {
+                // 左から右へのスワイプ
+                updateSlide(currentSlide - 1);
+            }
+        }
 
-// タッチイベントリスナーを追加
-sliderContainer.addEventListener('touchstart', handleTouchStart, false);
-sliderContainer.addEventListener('touchmove', handleTouchMove, false);
-sliderContainer.addEventListener('touchend', handleTouchEnd, false);
+        // タッチイベントリスナーを追加
+        sliderContainer.addEventListener('touchstart', handleTouchStart, false);
+        sliderContainer.addEventListener('touchmove', handleTouchMove, false);
+        sliderContainer.addEventListener('touchend', handleTouchEnd, false);
 
     </script>
 </body>
