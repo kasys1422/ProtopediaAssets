@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Image Slider</title>
+    <style>
+        .slider {
+            overflow: hidden;
+            max-width: 100%;
+            /* Slider width */
+        }
+
+        .slides {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+
+        .slide {
+            min-width: 100%;
+            /* Each slide's width */
+            overflow: hidden;
+        }
+
+        .slide img {
+            width: 100%;
+            vertical-align: middle;
+        }
+
+        .slides .slide {
+            opacity: 0;
+            /* 最初は全てのスライドを透明に */
+            transition: opacity 1s ease;
+            /* フェード処理の持続時間とタイプ */
+        }
+
+        .slides .slide.active {
+            opacity: 1;
+            /* アクティブなスライドは不透明に */
+        }
+
+        .ui,
+        .control {
+            opacity: 0;
+            /* 初期状態では透明 */
+            transition: opacity 1s ease;
+            /* フェード効果 */
+        }
+
+        .slider:hover .ui,
+        .slider:hover .control {
+            opacity: 1;
+            /* ホバー時に表示 */
+        }
+
+        .slide-name {
+            position: absolute;
+            width: 70%;
+            text-align: center;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .control,
+        .page-info {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            font-size: 18px;
+        }
+
+        .control:hover,
+        .page-info:hover {
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        .prev {
+            left: 10px;
+            border-radius: 5px;
+        }
+
+        .next {
+            right: 10px;
+            border-radius: 5px;
+        }
+
+        .page-info {
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 5px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="slider">
+        <div class="slides">
+            <!-- Add your slides here -->
+            <div class="slide"><img src="./img/slide_1.PNG" alt="Slide 1"></div>
+            <div class="slide"><img src="./img/slide_2.PNG" alt="Slide 2"></div>
+            <div class="slide"><img src="./img/slide_3.PNG" alt="Slide 3"></div>
+            <div class="slide"><img src="./img/slide_4.PNG" alt="Slide 1"></div>
+            <div class="slide"><img src="./img/slide_5.PNG" alt="Slide 2"></div>
+            <div class="slide"><img src="./img/slide_6.PNG" alt="Slide 3"></div>
+            <div class="slide"><img src="./img/slide_7.PNG" alt="Slide 1"></div>
+            <div class="slide"><img src="./img/slide_8.PNG" alt="Slide 2"></div>
+            <div class="slide"><img src="./img/slide_9.PNG" alt="Slide 3"></div>
+            <div class="slide"><img src="./img/slide_0.PNG" alt="Slide 1"></div>
+            <div class="slide"><img src="./img/slide_1.PNG" alt="Slide 2"></div>
+            <div class="slide"><img src="./img/slide_2.PNG" alt="Slide 3"></div>
+            <!-- Repeat for all slides, replacing the number in 'slide_n.png' with the correct slide number -->
+        </div>
+        <button class="control prev">&lt;</button>
+        <button class="control next">&gt;</button>
+        <div class="ui">
+            <div class="page-info">Page <span id="current-page">1</span> of <span id="total-pages">3</span></div>
+            <div class="slide-name">Slide Name</div> <!-- スライド名を表示 -->
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll(".slide");
+        const totalSlides = slides.length;
+        const sliderContainer = document.querySelector('.slider'); // スライダー全体を指すコンテナ
+
+        document.getElementById("total-pages").textContent = totalSlides;
+
+        function showUI() {
+            uiElements.forEach(el => el.style.opacity = "1");
+        }
+
+        function hideUI() {
+            uiElements.forEach(el => el.style.opacity = "0");
+        }
+
+        function updateSlide(position) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            currentSlide = (position + totalSlides) % totalSlides;
+            slides[currentSlide].classList.add('active');
+            document.getElementById("current-page").textContent = currentSlide + 1;
+            document.querySelector(".slide-name").textContent = `diffusion-image-searcher.pptx`;
+            document.querySelector(".slides").style.transform = `translateX(-${currentSlide * 100}%)`;
+            showUI();
+            setTimeout(hideUI, 5000); // Hide UI after 5 seconds
+        }
+
+        // スライドをクリックしたときの動作を削除する
+        // スライド全体にクリックイベントを適用しない
+
+        document.querySelector(".prev").addEventListener("click", () => updateSlide(currentSlide - 1));
+        document.querySelector(".next").addEventListener("click", () => updateSlide(currentSlide + 1));
+
+        // マウスホイールでのスライド切り替え機能を追加
+        sliderContainer.addEventListener('wheel', event => {
+            event.preventDefault(); // スクロール動作を防止
+            if (event.deltaY < 0) {
+                // スクロールアップ
+                updateSlide(currentSlide - 1);
+            } else {
+                // スクロールダウン
+                updateSlide(currentSlide + 1);
+            }
+        });
+
+        // 初期状態として最初のスライドをアクティブにし、UIを表示
+        updateSlide(0);
+
+    </script>
+</body>
+
+</html>
