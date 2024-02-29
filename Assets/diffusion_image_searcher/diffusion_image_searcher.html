@@ -70,7 +70,7 @@
         .control,
         .page-info {
             position: absolute;
-            top: 50%;
+            top: 30vw;
             transform: translateY(-50%);
             z-index: 100;
             background-color: rgba(0, 0, 0, 0.5);
@@ -178,6 +178,32 @@
 
         // 初期状態として最初のスライドをアクティブにし、UIを表示
         updateSlide(0);
+
+        let touchStartX = 0;
+let touchEndX = 0;
+
+function handleTouchStart(event) {
+    touchStartX = event.touches[0].clientX;
+}
+
+function handleTouchMove(event) {
+    touchEndX = event.touches[0].clientX;
+}
+
+function handleTouchEnd() {
+    if (touchStartX - touchEndX > 50) {
+        // 右から左へのスワイプ
+        updateSlide(currentSlide + 1);
+    } else if (touchStartX - touchEndX < -50) {
+        // 左から右へのスワイプ
+        updateSlide(currentSlide - 1);
+    }
+}
+
+// タッチイベントリスナーを追加
+sliderContainer.addEventListener('touchstart', handleTouchStart, false);
+sliderContainer.addEventListener('touchmove', handleTouchMove, false);
+sliderContainer.addEventListener('touchend', handleTouchEnd, false);
 
     </script>
 </body>
