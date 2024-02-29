@@ -132,21 +132,32 @@
     </div>
 
     <script>
-        let isUIDisplayed = true; // UIの表示状態を追跡
-
         let currentSlide = 0;
         const slides = document.querySelectorAll(".slide");
         const totalSlides = slides.length;
-        const sliderContainer = document.querySelector('.slider'); // スライダー全体を指すコンテナ
+        const uiElements = document.querySelectorAll(".ui, .control");
+        let uiVisible = false; // UIの表示状態を追跡するフラグ
+        let hideUITimer; // UIを隠すためのタイマー
 
         document.getElementById("total-pages").textContent = totalSlides;
 
-        function showUI() {
-            uiElements.forEach(el => el.style.opacity = "1");
+        function resetUITimer() {
+            clearTimeout(hideUITimer); // 既存のタイマーをクリア
+            hideUITimer = setTimeout(() => { // 新しいタイマーを設定
+                uiElements.forEach(el => el.style.opacity = "0");
+                uiVisible = false;
+            }, 2000); // 2秒後にUIを隠す
         }
 
-        function hideUI() {
-            uiElements.forEach(el => el.style.opacity = "0");
+        function toggleUI(event) {
+            // UI要素またはコントロールがクリックされた場合は何もしない
+            if (event && (event.target.closest('.ui') || event.target.closest('.control'))) {
+                return;
+            }
+
+            uiVisible = !uiVisible; // UIの表示状態を切り替え
+            uiElements.forEach(el => el.style.opacity = uiVisible ? "1" : "0");
+            if (uiVisible) resetUITimer(); // UIが表示されていればタイマーをリセット
         }
 
         function updateSlide(position) {
@@ -154,74 +165,47 @@
             currentSlide = (position + totalSlides) % totalSlides;
             slides[currentSlide].classList.add('active');
             document.getElementById("current-page").textContent = currentSlide + 1;
-            document.querySelector(".slide-name").textContent = `diffusion-image-searcher.pptx`;
+            document.querySelector(".slide-name").textContent = `Slide ${currentSlide + 1}`;
             document.querySelector(".slides").style.transform = `translateX(-${currentSlide * 100}%)`;
-            showUI();
-            setTimeout(hideUI, 5000); // Hide UI after 5 seconds
+            if (!uiVisible) showUI();
         }
 
-        // スライドをクリックしたときの動作を削除する
-        // スライド全体にクリックイベントを適用しない
+        document.querySelector('.slider').addEventListener("click", toggleUI);
+        document.querySelector('.slider').addEventListener("touchend", toggleUI);
 
-        document.querySelector(".prev").addEventListener("click", () => updateSlide(currentSlide - 1));
-        document.querySelector(".next").addEventListener("click", () => updateSlide(currentSlide + 1));
+        document.querySelector(".prev").addEventListener("click", (e) => {
+            e.stopPropagation(); // UIのtoggleを防ぐ
+            updateSlide(currentSlide - 1);
+            resetUITimer(); // タイマーをリセット
+        });
+        document.querySelector(".next").addEventListener("click", (e) => {
+            e.stopPropagation(); // UIのtoggleを防ぐ
+            updateSlide(currentSlide + 1);
+            resetUITimer(); // タイマーをリセット
+        });
 
-        // マウスホイールでのスライド切り替え機能を追加
-        sliderContainer.addEventListener('wheel', event => {
+        // マウスホイールでのスライド切り替え機能
+        document.querySelector('.slider').addEventListener('wheel', event => {
             event.preventDefault(); // スクロール動作を防止
             if (event.deltaY < 0) {
-                // スクロールアップ
                 updateSlide(currentSlide - 1);
             } else {
-                // スクロールダウン
                 updateSlide(currentSlide + 1);
             }
+            if (!uiVisible) showUI();
+            resetUITimer(); // タイマーをリセット
         });
+
+        // UIを表示する関数
+        function showUI() {
+            uiElements.forEach(el => el.style.opacity = "1");
+            uiVisible = true;
+            resetUITimer(); // UI表示のタイマーをリセット
+        }
 
         // 初期状態として最初のスライドをアクティブにし、UIを表示
         updateSlide(0);
 
-        function toggleUI(event) {
-            // UI要素との衝突判定を行う場合には、ここでチェック
-            // 今回は画像部分のみでのイベントを想定しているため、直接切り替えを行う
-            isUIDisplayed = !isUIDisplayed; // UIの表示状態を切り替え
-            if (isUIDisplayed) {
-                showUI();
-            } else {
-                hideUI();
-            }
-        }
-
-        // スライド部分に対してのみイベントリスナーを追加
-        slides.forEach(slide => {
-            slide.addEventListener('touchend', toggleUI, false);
-        });
-
-        let touchStartX = 0;
-        let touchEndX = 0;
-
-        function handleTouchStart(event) {
-            touchStartX = event.touches[0].clientX;
-        }
-
-        function handleTouchMove(event) {
-            touchEndX = event.touches[0].clientX;
-        }
-
-        function handleTouchEnd() {
-            if (touchStartX - touchEndX > 50) {
-                // 右から左へのスワイプ
-                updateSlide(currentSlide + 1);
-            } else if (touchStartX - touchEndX < -50) {
-                // 左から右へのスワイプ
-                updateSlide(currentSlide - 1);
-            }
-        }
-
-        // タッチイベントリスナーを追加
-        sliderContainer.addEventListener('touchstart', handleTouchStart, false);
-        sliderContainer.addEventListener('touchmove', handleTouchMove, false);
-        sliderContainer.addEventListener('touchend', handleTouchEnd, false);
 
     </script>
 </body>
